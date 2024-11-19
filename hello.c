@@ -1,27 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//
 // \\ []{}
 
-int main() {
+int sizeCalculator(char nameFile[]) {
+  FILE *testFile;
+  testFile = fopen(nameFile, "r");
+  int lines = 0;
+  char lineString[50];
 
-  // int arraySize=0;
+  while (fgets(lineString, 50, testFile)) {
+    lines = lines + 1;
+  }
+
+  fclose(testFile);
+
+  return lines;
+}
+
+int main(int argc, char *argv[]) {
+
+  // use function to calculate the amount of lines in the file script
+  int arraySize = sizeCalculator(argv[1]);
 
   FILE *scriptFile;
-  scriptFile = fopen("test.sc", "r");
+  scriptFile = fopen(argv[1], "r");
 
-  char scriptArray[50];
-  
-  fgets(scriptArray, 50, scriptFile);
-  
-  // for (int i = 0; i < 50; i = i + 1){
-  //   printf("(%c)",scriptArray[i]);
-  // }
+  char scriptArray[arraySize];
+   
+  while (fgets(scriptArray, arraySize, scriptFile)) {;
+    printf("%s",scriptArray);
+  }
 
-  printf("%s",scriptArray);
-
-  fclose(scriptArray);
+  fclose(scriptFile);
 
   return 0;
 }
