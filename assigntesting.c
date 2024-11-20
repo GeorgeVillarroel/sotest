@@ -3,34 +3,19 @@
 
 // \\ []{}
 
-
-void call(void (**testFunction)(void), void *libArgument, char* pathArgument) {
-  *testFunction = (void (*)())dlsym(libArgument, pathArgument);
-  if (!testFunction) {
-    fprintf(stderr, "The function is not found. %s\n", dlerror());
-    return;
-  } 
-}
-
 // ]}
 
 int main() {
 
-  void *handle;
-  void (*testFunction)(void);
-  char* commandString = "createTestFile";
+  char userInput[50];
 
-      
-  handle = dlopen("./lib_test_filing.so", RTLD_NOW);
-  if (!handle) {
-    fprintf(stderr, "The file is not found or a shared library: %s\n", dlerror());
-    return 1;
-  }
-  call(&testFunction, handle, commandString);
-  
-  testFunction();
+  while (userInput[0] != '3') {
 
-  dlclose(handle);
-
-  return 0;
+    printf("Menu \n 1- \n 2- \n 3- \n Enter Option: ");
+    fgets(userInput, 50, stdin );    
+      if (userInput[0] == '1') {
+        printf("inside the 1 if");    
+      } 
+    printf("%s", userInput );
+  } 
 }
