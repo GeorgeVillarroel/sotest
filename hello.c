@@ -10,7 +10,7 @@ void lexer(char (*str)[30], char newStr[]) {
 
 
     int j = 0;
-    for ( int k = 5 ; newStr[k] != '\0' && newStr[k] != '\r' && newStr[k] != '\n' && newStr[k] != ' ' ; k = k +1) {
+    for ( int k = 5 ; newStr[k] != '\0' && newStr[k] != '\r' && newStr[k] != '\n' && newStr[k] != ' ' && newStr[k] !='\\' && newStr[k] != ';' ; k = k +1) {
       if (isalpha(newStr[k]) || newStr[k] == '.' || isdigit(newStr[k]) || newStr[k] == '_' ){
 	str[1][j] = newStr[k];
       }
@@ -25,7 +25,7 @@ void lexer(char (*str)[30], char newStr[]) {
 
 
     int j = 0;
-    for ( int k = 4 ; newStr[k] != '\0' && newStr[k] != '\r' && newStr[k] != '\n' && newStr[k] != ' ' ; k = k +1) {
+    for ( int k = 4 ; newStr[k] != '\0' && newStr[k] != '\r' && newStr[k] != '\n' && newStr[k] != ' ' && newStr[k] != '\\' && newStr[k] != ';' ; k = k +1) {
       if ( isalpha(newStr[k]) || newStr[k] == '.' || isdigit(newStr[k]) || newStr[k] == '_') {
 	str[1][j] = newStr[k];
       }
@@ -72,16 +72,22 @@ int main(int argc, char *argv[]) {
   scriptFile = fopen(argv[1], "r");
 
   while (fgets(scriptArray, 50, scriptFile)) {
-    lexer(commandString, scriptArray);
-    if (strcmp(commandString[0],"call") == 0) {
-      call(&testFileFunction, sharedLib, commandString[1]);
-      testFileFunction();
-    } else if (strcmp(commandString[0],"use") == 0) {
-      use(&sharedLib, commandString[1]);
-      if (!sharedLib) {
-        printf("The library is not loaded. ");
-      } 
-    }
+    if (scriptArray[0] != '#') {
+	  
+      lexer(commandString, scriptArray);
+      if (strcmp(commandString[0],"call") == 0) {
+        call(&testFileFunction, sharedLib, commandString[1]);
+        testFileFunction();
+      } else if (strcmp(commandString[0],"use") == 0) {
+        use(&sharedLib, commandString[1]);
+        if (!sharedLib) {
+          printf("The library is not loaded. ");
+        } 
+      }
+
+    } else {
+    continue;
+    }    
   }
   fclose(scriptFile);
   dlclose(sharedLib);
