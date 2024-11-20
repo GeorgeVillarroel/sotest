@@ -4,8 +4,6 @@
 #include <ctype.h>
 #include <dlfcn.h>
 
-// \\ []{}
-
 void lexer(char (*str)[30], char newStr[]) {
   if (newStr[0] == 'c' && newStr[1] == 'a' &&  newStr[2] == 'l' && newStr[3] == 'l' && newStr[4] == ' '){ 
     strcpy(str[0], "call");
@@ -60,45 +58,31 @@ void call(void (**testFunction)(void), void *libArgument, char* functionArgument
   }
 }
 
-// ]}
+// MAIN
 
 int main(int argc, char *argv[]) {
 
-  // script file var declarations
-  FILE *scriptFile;
-  scriptFile = fopen(argv[1], "r");
   char scriptArray[50];
   char commandString[2][30];
 
-  // library declarations
   void *sharedLib;
   void (*testFileFunction)(void);
 
-  int menu;
-  char userInput[50];
+  FILE *scriptFile;
+  scriptFile = fopen(argv[1], "r");
 
-    printf("Menu:  1-Run Script. 2-Enter command. Enter option: ");
-    scanf("%d", &menu);
-
-    //Menu 1 run script
-  if (menu == 1){
-      
-      while (fgets(scriptArray, 50, scriptFile)) {
-        lexer(commandString, scriptArray);
-        if (strcmp(commandString[0],"call") == 0) {
-          call(&testFileFunction, sharedLib, commandString[1]);
-          testFileFunction();
-        } else if (strcmp(commandString[0],"use") == 0) {
-          use(&sharedLib, commandString[1]);
-          if (!sharedLib) {
-          printf("The library is not loaded. ");
-         } 
-       }
-     }  
-  } else {
-    fgets(userInput, 50, stdin);
+  while (fgets(scriptArray, 50, scriptFile)) {
+    lexer(commandString, scriptArray);
+    if (strcmp(commandString[0],"call") == 0) {
+      call(&testFileFunction, sharedLib, commandString[1]);
+      testFileFunction();
+    } else if (strcmp(commandString[0],"use") == 0) {
+      use(&sharedLib, commandString[1]);
+      if (!sharedLib) {
+        printf("The library is not loaded. ");
+      } 
+    }
   }
-
   fclose(scriptFile);
   dlclose(sharedLib);
 
