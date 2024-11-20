@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <dlfcn.h>
 
 // \\ []{}
 
@@ -20,7 +21,7 @@ int sizeCalculator(char nameFile[]) {
   return lines;
 }
 
-void parser(char (*str)[30], char newStr[]) {
+void lexer(char (*str)[30], char newStr[]) {
   if (newStr[0] == 'c' && newStr[1] == 'a' &&  newStr[2] == 'l' && newStr[3] == 'l' && newStr[4] == ' '){ 
     strcpy(str[0], "call");
 
@@ -56,25 +57,66 @@ void parser(char (*str)[30], char newStr[]) {
   printf("%s %s\n", str[0], str[1]);
 }
 
+void use(void **sharedLib, char pathArgument[]) {
+  char libraryPath[100] = "./";
+  strcat(libraryPath, pathArgument);
+  sharedLib = dlopen(libraryPath, RTLD_NOW);
+  if (!sharedLib) {
+    fprintf(stderr, "The file is not found or a shared library: %s\n", dlerror());
+  } else {
+    printf("Library loaded properly\n"); 
+  }
+}
+
+void call(void *sharedLib, char functionArgument[]) {
+  void (*testFileFunction)(void);
+
+  printf("%s\n",functionArgument);
+
+  testFileFunction = (void (*)())dlsym(sharedLib, functionArgument);
+  if (!testFileFunction) {
+    fprintf(stderr, "The function is not found. %s\n", dlerror());
+  } else {
+    testFileFunction();
+  }
+}
+
 // ]}
 
 int main(int argc, char *argv[]) {
 
-  // use function to calculate the amount of lines in the file script
+  // script file var declarations
   int arraySize = sizeCalculator(argv[1]);
-
   FILE *scriptFile;
   scriptFile = fopen(argv[1], "r");
-
   char scriptArray[50];
   char commandString[2][30];
 
+  // library declarations
+  void *sharedLib;
+  void (*testFileFunction)(void);
+
   while (fgets(scriptArray, 50, scriptFile)) {;
-    parser(commandString, scriptArray); 
-  //  lexer(commandString);
+    lexer(commandString, scriptArray);
+
+    if (strcmp(commandString[0],"call") == 0) {
+      call(sharedLib,commandString[1]);
+      printf("using call\n");
+    } else if (strcmp(commandString[0],"use") == 0) {
+      
+      use(&sharedLib, commandString[1]);
+      
+      if (!sharedLib) {
+        printf("The library is not loaded.\n");
+      } 
+    } else {}
+    
+    // parser(commandString);
   }
 
   fclose(scriptFile);
+
+  dlclose(sharedLib);
 
   return 0;
 }

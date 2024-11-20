@@ -1,5 +1,3 @@
-use test.sc
-call example
-call test1_func
-use other.so
-call func1
+use lib_test_filing.so
+call createTestFile
+call deleteTestFile
