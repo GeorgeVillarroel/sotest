@@ -6,21 +6,6 @@
 
 // \\ []{}
 
-int sizeCalculator(char nameFile[]) {
-  FILE *testFile;
-  testFile = fopen(nameFile, "r");
-  int lines = 0;
-  char lineString[50];
-
-  while (fgets(lineString, 50, testFile)) {
-    lines = lines + 1;
-  }
-
-  fclose(testFile);
-
-  return lines;
-}
-
 void lexer(char (*str)[30], char newStr[]) {
   if (newStr[0] == 'c' && newStr[1] == 'a' &&  newStr[2] == 'l' && newStr[3] == 'l' && newStr[4] == ' '){ 
     strcpy(str[0], "call");
@@ -80,7 +65,6 @@ void call(void (**testFunction)(void), void *libArgument, char* functionArgument
 int main(int argc, char *argv[]) {
 
   // script file var declarations
-  int arraySize = sizeCalculator(argv[1]);
   FILE *scriptFile;
   scriptFile = fopen(argv[1], "r");
   char scriptArray[50];
@@ -90,26 +74,59 @@ int main(int argc, char *argv[]) {
   void *sharedLib;
   void (*testFileFunction)(void);
 
-  while (fgets(scriptArray, 50, scriptFile)) {;
-    lexer(commandString, scriptArray);
+  int menu;
 
-    if (strcmp(commandString[0],"call") == 0) {
-      call(&testFileFunction, sharedLib, commandString[1]);
-      testFileFunction();
-    } else if (strcmp(commandString[0],"use") == 0) {
+  printf("Menu:\n1-Run Script.\n2-Enter command. (Type quit to exit)\n3-Exit.\nEnter option: ");
+  scanf("%d", &menu);
+
+  while (menu != 3) {
+    //Menu 1 run script
+    if (menu == 1){
+      while (fgets(scriptArray, 50, scriptFile)) {;
+        lexer(commandString, scriptArray);
+
+        if (strcmp(commandString[0],"call") == 0) {
+          call(&testFileFunction, sharedLib, commandString[1]);
+          testFileFunction();
+        } else if (strcmp(commandString[0],"use") == 0) {
+          use(&sharedLib, commandString[1]);
+          if (!sharedLib) {
+          printf("The library is not loaded.\n");
+          } 
+        } else {}  
+      }
+      return 1;
+    // Menu 2 user input
+    } else if (menu == 2) {
+      char userInput[50];
+      fgets(userInput, 50, stdin);
       
-      use(&sharedLib, commandString[1]);
-      
-      if (!sharedLib) {
-        printf("The library is not loaded.\n");
-      } 
-    } else {}
-    
-    // parser(commandString);
+      while (userInput != "quit") {
+        lexer(commandString, userInput);
+        if (strcmp(commandString[0],"call") == 0) {
+          call(&testFileFunction, sharedLib, commandString[1]);
+          testFileFunction();
+        } else if (strcmp(commandString[0],"use") == 0) {
+          use(&sharedLib, commandString[1]);
+          if (!sharedLib) {
+            printf("The library is not loaded.\n");
+          }
+        } else {}
+      }
+      return 1;
+    // Menu option 3 quit
+    } else if (menu == 3) {
+      fclose(scriptFile);
+      return 1;
+
+    // Menu invalid option
+    } else {
+      printf("Incorrect option. try again\n");
+    }
+    printf("Menu:\n1-Run Script.\n2-Enter command. (Type quit to exit)\n3-Exit.\nEnter option: ");
+    scanf("%d", &menu);
   }
-
   fclose(scriptFile);
-
   dlclose(sharedLib);
 
   return 0;
