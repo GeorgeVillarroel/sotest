@@ -53,14 +53,13 @@ void lexer(char (*str)[30], char newStr[]) {
 
   } else {
     printf("Syntax Error: %s . Not a proper call.\n", newStr);
-  }
-  printf("%s %s\n", str[0], str[1]);
+  } 
 }
 
 void use(void **sharedLib, char pathArgument[]) {
   char libraryPath[100] = "./";
   strcat(libraryPath, pathArgument);
-  sharedLib = dlopen(libraryPath, RTLD_NOW);
+  *sharedLib = dlopen(libraryPath, RTLD_NOW);
   if (!sharedLib) {
     fprintf(stderr, "The file is not found or a shared library: %s\n", dlerror());
   } else {
@@ -68,16 +67,11 @@ void use(void **sharedLib, char pathArgument[]) {
   }
 }
 
-void call(void *sharedLib, char functionArgument[]) {
-  void (*testFileFunction)(void);
-
-  printf("%s\n",functionArgument);
-
-  testFileFunction = (void (*)())dlsym(sharedLib, functionArgument);
-  if (!testFileFunction) {
+void call(void (**testFunction)(void), void *libArgument, char* functionArgument){
+  *testFunction = (void (*)())dlsym(libArgument, functionArgument);
+  if (!testFunction) {
     fprintf(stderr, "The function is not found. %s\n", dlerror());
-  } else {
-    testFileFunction();
+    return;
   }
 }
 
@@ -100,8 +94,8 @@ int main(int argc, char *argv[]) {
     lexer(commandString, scriptArray);
 
     if (strcmp(commandString[0],"call") == 0) {
-      call(sharedLib,commandString[1]);
-      printf("using call\n");
+      call(&testFileFunction, sharedLib, commandString[1]);
+      testFileFunction();
     } else if (strcmp(commandString[0],"use") == 0) {
       
       use(&sharedLib, commandString[1]);
